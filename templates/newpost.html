@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+   
+    <h2>new post</h2>
+
+    <form method="post">
+        <div class="ui-widget">
+            <label for="tags">To: </label>
+            <input id="tags" name="toadd" value="{{toadd}}">
+        </div>
+
+      <label>
+        <div>Is it a GroupPost</div>
+        <input type="text" name="isgroup" value="">
+      </label>
+
+    <label>
+        <div>subject</div>
+        <input type="text" name="subject" value="{{subject}}">
+      </label>
+
+      <label>
+        <div>blog</div>
+        <textarea name="content">{{content}}</textarea>
+      </label>
+
+      <div class="error">{{error}}</div>
+
+      <input type="submit">
+    </form>
+<script>
+$(function() {
+    
+    var availableTags = [
+      "ActionScript",
+      "AppleScript",
+      "Asp",
+      "BASIC",
+      "C",
+      "C++",
+      "Clojure",
+      "COBOL",
+      "ColdFusion",
+      "Erlang",
+      "Fortran",
+      "Groovy",
+      "Haskell",
+      "Java",
+      "JavaScript",
+      "Lisp",
+      "Perl",
+      "PHP",
+      "Python",
+      "Ruby",
+      "Scala",
+      "Scheme"
+    ];
+    
+    var decodedPart = decodeURIComponent('{{availableTags}}');
+    var firstLevel = replaceAll('=', '', decodedPart);
+    var strJson = firstLevel.replace('+', '');
+    var strToUse = eval(strJson);
+    $("#tags").autocomplete({
+      source: strToUse
+    });
+  });
+    function replaceAll(find, replace, str) {
+        return str.replace(new RegExp(find, 'g'), replace);
+    }
+  </script>
+{% endblock %}
