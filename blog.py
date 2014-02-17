@@ -260,9 +260,11 @@ class NewPost(BlogHandler):
     def get(self):
         if self.user:
             # get contact list for the user.
-            contactList = db.GqlQuery("select toadd from Post where fromadd = '" + self.user.email + "'")
-        #    contactList = map(lambda x: x[1], queryresult)
-            self.render("newpost.html", availableTags = urllib.urlencode({"" : ['anupam@pally.in','mediratta@gmail.com']}))
+            queryresult = db.GqlQuery("select toadd from Post where fromadd = '" + self.user.email + "'")
+            contactList = []
+            for add in queryresult:
+                contactList.append(add)
+            self.render("newpost.html", availableTags = urllib.urlencode({"" : contactList}))
         #    self.render("newpost.html", availableTags = json.dumps(['anupam@pally.in','mediratta@gmail.com']))
         else:
             self.redirect("/login")
@@ -338,7 +340,7 @@ class Signup(BlogHandler):
 
 class Register(Signup):
     def done(self):
-        if self.isgroup:
+        if self.isgroup == 'yes':
             g = Group.by_name(self.email)
             if g:
                 msg = 'That group already exists.'
