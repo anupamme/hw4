@@ -1,0 +1,65 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1265
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11100\viewh8700\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural
+
+\f0\b\fs24 \cf0 db structure
+\b0 \
+\
+# Any user.\
+class User(db.Model):\
+    email = db.EmailProperty(required = True, indexed = True)\
+    pw_hash = db.StringProperty(required = True)\
+    join_date = db.DateTimeProperty(auto_now_add = True)\
+    groups = db.TextProperty(tuple)\
+\
+# Any Group.\
+class Group(db.Model):\
+    email = db.StringProperty(required = True, indexed = True)\
+    pw_hash = db.StringProperty(required = True)\
+\
+# Individual Message\
+class Post(db.Model):\
+    subject = db.StringProperty(required = True)\
+    content = db.TextProperty(required = True)\
+    created = db.DateTimeProperty(auto_now_add = True)\
+    fromadd = db.StringProperty(required = True, indexed = True)\
+    toadd = db.StringProperty(required = True, indexed = True)\
+    read = db.BooleanProperty(required = True)\
+\
+# Group Messages (same as Individual Message).\
+class GroupPost(db.Model):\
+    subject = db.StringProperty(required = True)\
+    content = db.TextProperty(required = True)\
+    created = db.DateTimeProperty(auto_now_add = True)\
+    fromadd = db.StringProperty(required = True, indexed = True)    # user id.\
+    toadd = db.StringProperty(required = True, indexed = True)      # groupid\
+    read = db.BooleanProperty(required = True)\
+\
+Another possible table: Group User permissions to spec which user has permission to send permissions to which group.\
+\
+
+\b design notes
+\b0 \
+1. there are 2 tables: one for individual messages and second for group messages.\
+2. Broadcast messages are a special case of group message where everyone has joined that group.\
+3. In the User table, besides storing email, password hash, I also added a list of group membership: [(group_id, start, end)]\
+4. Both Individual and Group messages have indexes on to and from email-id so that they can be fast queried.\
+5. To automatically mark a message read, it means viewing a message will be a POST request. I tried implementing it like a POST but I was getting 405 error so I had to resort to GET request. So I ended up with a GET request which changes state.\
+6. Auto-complete works - I used a jquery element for this.\
+7. markdown format - is not taken care of. But I see there is a python package markdown which can be used to convert markdown to html.\
+\
+\
+
+\b tests
+\b0 : requires lot of infra setup due to app engine stubs used.\
+On request, I can add following tests.\
+1. Adding a message with from/to field. And then retrieve to see it is same.\
+2. Adding a group message and testing.\
+3. Testing the auto-suggest field.\
+4. Testing sending of group/individual message.\
+5. Registering a group/individual\
+6. Deleting a message.\
+7. Marking it read.\
+}

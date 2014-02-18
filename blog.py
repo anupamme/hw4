@@ -96,7 +96,7 @@ def users_key(group = 'default'):
     return db.Key.from_path('users', group)
 
 class Group(db.Model):
-    email = db.StringProperty(required = True)
+    email = db.StringProperty(required = True, indexed = True)
     pw_hash = db.StringProperty(required = True)
     
     @classmethod
@@ -121,7 +121,7 @@ class Group(db.Model):
             return g
         
 class User(db.Model):
-    email = db.EmailProperty(required = True)
+    email = db.EmailProperty(required = True, indexed = True)
     pw_hash = db.StringProperty(required = True)
     join_date = db.DateTimeProperty(auto_now_add = True)
     groups = db.TextProperty(tuple)
