@@ -6,6 +6,7 @@ import hmac
 import logging
 import cgi
 import urllib
+import urllib2
 import json
 import datetime
 from string import letters
@@ -20,6 +21,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
                                autoescape = True)
 
 secret = 'fart'
+markdownurlservice = "http://markdown-service.appspot.com/markdown?content="
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
@@ -233,7 +235,8 @@ class PostPage(BlogHandler):
         
         post.read = True
         post.put()
-        
+        url = urllib2.urlopen(markdownurlservice + urllib.quote_plus(post.content))
+        post.content = url.read()
         self.render("permalink.html", post = post)
         
     def get(self, post_id):
