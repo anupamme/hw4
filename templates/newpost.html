@@ -2,17 +2,17 @@
 
 {% block content %}
    
-    <h2>new post</h2>
+    <h2>new message</h2>
 
     <form method="post">
         <div class="ui-widget">
             <label for="tags">To: </label>
             <input id="tags" name="toadd" value="{{toadd}}">
         </div>
-
+    <br />
       <label>
-        <div>Is it a GroupPost</div>
-        <input type="text" name="isgroup" value="">
+        <span>Is it a GroupPost</span>
+        <input type="checkbox" name="isgroup" value="True">
       </label>
 
     <label>

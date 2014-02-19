@@ -63,7 +63,8 @@ class BlogHandler(webapp2.RequestHandler):
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.by_id(int(uid))
+        self.user = uid and (User.by_id(int(uid)) or Group.by_id(int(uid)))
+        
         # populate users
         
         # populate groups
@@ -185,8 +186,9 @@ class Post(db.Model):
 class BlogFront(BlogHandler):
     def get(self):
         logging.warning("username is: " + str(self.user))
+        
         username = self.user.email
-        if username:
+        if username and isinstance(self.user, User):
             sumqueries = []
             posts = db.GqlQuery("select * from Post where toadd = '" + username + "'")
             # find the groups user is a member of.
@@ -277,10 +279,11 @@ class NewPost(BlogHandler):
         content = self.request.get('content')
         toadd = self.request.get('toadd')
         fromadd = self.user.email
-        isgroup = self.request.get('isgroup')
+        isgroup = self.request.get('isgroup', '').lower() in ['true', 'yes',
+'t', '1', 'on', 'checked']
 
         if subject and content and fromadd and toadd:
-            if isgroup == 'yes':
+            if isgroup:
                 p = GroupPost(parent = blog_key(), subject = subject, content = content, fromadd = fromadd, toadd = toadd, read = False)
                 p.put()
                 self.redirect('/blog/group/%s' % str(p.key().id()))
@@ -315,8 +318,10 @@ class Signup(BlogHandler):
         self.password = self.request.get('password')
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
-        self.isgroup = self.request.get('isgroup')
-
+        self.isgroup = self.request.get('isgroup', '').lower() in ['true', 'yes',
+'t', '1', 'on', 'checked']
+        #self.isgroup = self.request.get('isgroup')
+        logging.warn("checkbox value: " + str(self.isgroup))
         params = dict(email = self.email)
 
         if not valid_password(self.password):
@@ -340,7 +345,8 @@ class Signup(BlogHandler):
 
 class Register(Signup):
     def done(self):
-        if self.isgroup == 'yes':
+        logging.warn("type of self: " + str(type(self)))
+        if self.isgroup:
             g = Group.by_name(self.email)
             if g:
                 msg = 'That group already exists.'
@@ -349,7 +355,9 @@ class Register(Signup):
                 g = Group.register(self.email, self.password)
                 g.put()
                 self.login(g)
-                self.redirect('/blog')
+                params = dict()
+                params['notice'] = str(self.email) + " registered as a group!"
+                self.render('signup-form.html', **params)
         else:    
             #make sure the user doesn't already exist
             u = User.by_name(self.email)
